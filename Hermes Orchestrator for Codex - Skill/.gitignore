@@ -1,0 +1,20 @@
+# macOS
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temp / logs
+*.log
+*.tmp
+*.bak
+
+# Local runtime outputs
+local/
+output/
+
+# Workspace test data created during manual trials
+examples/tmp/

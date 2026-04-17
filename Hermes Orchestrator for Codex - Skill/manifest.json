@@ -1,0 +1,26 @@
+{
+  "name": "Hermes Orchestrator for Codex",
+  "slug": "hermes-orchestrator-for-codex",
+  "version": "0.1.0",
+  "entrypoint": "prompts/@Hermes.md",
+  "description": "Hermes plans and governs, Codex executes, and each round persists project state to disk.",
+  "activation_aliases": [
+    "@Hermes"
+  ],
+  "features": {
+    "disk_persistence": true,
+    "adversarial_roles": true,
+    "wechat_gateway_ready": true,
+    "reuse_local_hermes": true
+  },
+  "workspace_templates": [
+    "templates/PROJECT_STATE.md",
+    "templates/CURRENT_PLAN.md",
+    "templates/EXECUTION_LOG.md",
+    "templates/DECISIONS.md"
+  ],
+  "scripts": {
+    "install": "scripts/install.sh",
+    "bootstrap_workspace": "scripts/bootstrap_workspace.sh"
+  }
+}
