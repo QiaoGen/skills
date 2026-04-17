@@ -1,55 +1,90 @@
 # Codex Integration Guide
 
 ## Goal
-Install this repository as a Codex skill and expose `@Hermes` as the entry point for a governed workflow.
+Install this repository as a Codex skill and expose `@Hermes` as the user-facing entry point for a governed workflow.
 
-## Integration Model
-This repository assumes Codex supports one or more of the following:
-- prompt aliases
-- custom skills
-- command aliases
-- startup prompt files
+This document is written from the perspective of a **user installing the skill**, not from the perspective of editing the origin repository.
 
-The exact registration mechanism may vary by Codex runtime.
+---
 
-## Minimum integration requirement
-`@Hermes` must map to:
+## 1. Two layers of integration
 
-```text
-prompts/@Hermes.md
-```
+There are two separate things that must happen:
 
-## Installation
-Run:
+### Layer A: local filesystem installation
+The skill package must exist in a location that Codex can access locally.
 
-```bash
-bash scripts/install.sh
-```
-
-By default, it installs to:
+Default target:
 
 ```text
 $HOME/.codex/skills/Hermes
 ```
 
-If your Codex installation uses another directory, set:
+### Layer B: Codex activation
+Codex must be told how to enter this mode.
+The desired user-facing activation is:
 
-```bash
-export CODEX_SKILLS_DIR=/your/codex/skills/path
+```text
+@Hermes
 ```
 
-before running the install script.
+So installing files is necessary, but not sufficient.
+The user also needs either:
+- native alias / skill registration
+- or a ready-to-paste bootstrap prompt in a Codex conversation
 
-## After install
-Make sure your Codex runtime recognizes:
-- `README.md`
-- `SKILL.md`
-- `manifest.json`
-- `prompts/@Hermes.md`
+---
 
-Then register `@Hermes` as an alias or skill entrypoint.
+## 2. User installation from GitHub
 
-## Expected usage
+Replace `<repo-url>` with the actual repository URL.
+
+### Fresh install
+```bash
+mkdir -p ~/development/github/skills && cd ~/development/github/skills && git clone <repo-url> "Hermes Orchestrator for Codex - Skill" && cd "Hermes Orchestrator for Codex - Skill" && bash scripts/install.sh
+```
+
+### Update existing checkout
+```bash
+cd ~/development/github/skills/"Hermes Orchestrator for Codex - Skill" && git pull && bash scripts/install.sh
+```
+
+---
+
+## 3. Required mapping
+
+The intended mapping is:
+
+```text
+@Hermes -> prompts/@Hermes.md
+```
+
+If Codex supports custom skills or aliases, register `@Hermes` against that file.
+
+If Codex does not support it yet, use the bootstrap fallback below.
+
+---
+
+## 4. One-paste fallback for Codex conversations
+
+Paste the following text into a fresh Codex conversation to emulate the skill even before native alias registration is fully wired.
+
+```text
+You are now running Hermes Orchestrator mode.
+Hermes plans, Codex executes.
+Every round plan must be persisted to disk.
+Use .hermes/workspace/PROJECT_STATE.md, CURRENT_PLAN.md, EXECUTION_LOG.md, and DECISIONS.md as the durable project memory.
+For risky or architectural tasks, run adversarial review using these roles: PM/Business, Architect/Technical Lead, Execution Engineer, QA/Operations, Skeptic/Risk Officer.
+Do not rely on long transcript context as the source of truth.
+If the user says @Hermes, treat that as a request to enter or resume this governed workflow.
+Before implementation, restate goal, constraints, phase, plan, and execution boundary.
+```
+
+This fallback should be documented because users need a path that works even before Codex-side alias plumbing is perfect.
+
+---
+
+## 5. Expected usage after activation
 
 ```text
 @Hermes 项目 TorchVision，只分析，不改代码
@@ -63,29 +98,36 @@ Then register `@Hermes` as an alias or skill entrypoint.
 @Hermes 先做对抗评审，再决定是否进入实施
 ```
 
-## Behavior expectations
-When `@Hermes` is invoked, the workflow should:
-1. Load workspace files
-2. Restate the goal and constraints
-3. Run adversarial review if needed
-4. Write a current-round plan to disk
-5. Execute only inside the approved boundary
-6. Update logs and decisions after execution
+---
 
-## Recommended local wrapper
-If Codex supports custom shell wrappers, consider exposing something like:
+## 6. Workspace initialization
+
+Before using the workflow, initialize workspace files:
+
+```bash
+bash "$HOME/.codex/skills/Hermes/scripts/bootstrap_workspace.sh" /path/to/project
+```
+
+---
+
+## 7. Recommended local wrapper (future enhancement)
+
+If Codex supports local wrappers, a future enhancement is a command like:
 
 ```bash
 codex-hermes /path/to/project
 ```
 
-This wrapper can:
+This wrapper could:
 - change to the project directory
 - ensure `.hermes/workspace/` exists
 - load or initialize templates
-- open Codex with `@Hermes` preloaded
+- preload `@Hermes`
 
-## Non-goals
+---
+
+## 8. Non-goals
+
 This repository intentionally does **not** require:
 - intrusive patching of Codex internal conversation storage
 - direct embedding of WeChat transcript into Codex UI

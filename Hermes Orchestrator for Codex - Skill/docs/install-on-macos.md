@@ -1,101 +1,191 @@
 # Install on macOS
 
 ## Goal
-Install **Hermes Orchestrator for Codex - Skill** on macOS, reuse any existing local Hermes runtime, and expose `@Hermes` as the Codex entrypoint for the governed workflow.
+Install **Hermes Orchestrator for Codex - Skill** on macOS from the perspective of an **end user**.
+
+This repository under GitHub is the **origin/source package**.
+A user should be able to:
+1. clone or download the repository
+2. install the skill into their local Codex skills directory
+3. paste a ready-made `@Hermes` bootstrap instruction into Codex
+4. start using the workflow without manually rebuilding the skill from source
 
 ---
 
-## 1. Recommended environment
+## 1. Origin repo vs user install
 
-On macOS, the recommended setup is straightforward:
-- Codex CLI / Codex runtime installed locally
-- terminal environment available (`zsh` or `bash`)
-- optional but recommended: an existing `hermes` command on `PATH`
+There are two different viewpoints:
 
-This repository is a **skill package**, not a second Hermes runtime.
-If Hermes already exists locally, this skill should reuse it instead of reinstalling it.
+### A. Origin / source repository
+This is the GitHub-hosted source of truth for the skill.
+It contains:
+- docs
+- templates
+- prompts
+- scripts
+- manifest
 
----
-
-## 2. Default install target
-
-By default, the bundled install script writes the skill to:
+### B. User installation target
+This is where the skill must actually be copied so Codex can use it locally.
+By default:
 
 ```text
 $HOME/.codex/skills/Hermes
 ```
 
-If your Codex installation uses a different skills directory, set:
+So the installation story should be:
+
+> pull from GitHub → install locally → tell Codex how to use it
+
+not:
+
+> edit the origin repo directly and assume Codex already knows it exists
+
+---
+
+## 2. Prerequisites
+
+Recommended on macOS:
+- Codex runtime available locally
+- terminal shell (`zsh` or `bash`)
+- `git`
+- optional but recommended: local `hermes` runtime already installed and available on `PATH`
+
+This skill is a **package** that should reuse Hermes if Hermes already exists.
+It should not blindly install another Hermes runtime.
+
+---
+
+## 3. Fast path for end users
+
+If the repository is already on GitHub, a user-facing install flow should look like this.
+
+### One-command clone + install
+
+Replace `<repo-url>` with your actual GitHub repository URL.
+
+```bash
+mkdir -p ~/development/github/skills && cd ~/development/github/skills && git clone <repo-url> "Hermes Orchestrator for Codex - Skill" && cd "Hermes Orchestrator for Codex - Skill" && bash scripts/install.sh
+```
+
+If the repository already exists locally:
+
+```bash
+cd ~/development/github/skills/"Hermes Orchestrator for Codex - Skill" && git pull && bash scripts/install.sh
+```
+
+---
+
+## 4. What installation actually does
+
+The install script copies the skill package into Codex's local skill directory.
+
+Default target:
+
+```text
+$HOME/.codex/skills/Hermes
+```
+
+It also:
+1. copies `README.md`, `SKILL.md`, and `manifest.json`
+2. copies `prompts/@Hermes.md`
+3. copies workspace templates
+4. copies helper scripts
+5. checks whether `hermes` already exists on `PATH`
+6. records the runtime path into `HERMES_RUNTIME.txt`
+
+If your Codex installation uses another directory, set:
 
 ```bash
 export CODEX_SKILLS_DIR=/your/custom/codex/skills
 ```
 
-before running the install script.
+before running the installer.
 
 ---
 
-## 3. Install steps
+## 5. The missing piece: make Codex know about the skill
 
-From the skill repository root, run:
+Installing files into the local skills directory is only half of the job.
 
-```bash
-cd "/Users/drogonz/development/github/skills/Hermes Orchestrator for Codex - Skill"
-bash scripts/install.sh
-```
-
-### What the install script does
-1. Creates the target skill directory
-2. Copies `README.md`, `SKILL.md`, and `manifest.json`
-3. Copies `prompts/@Hermes.md`
-4. Copies workspace templates
-5. Copies helper scripts
-6. Detects whether `hermes` is already available on `PATH`
-7. Writes a runtime note into `HERMES_RUNTIME.txt`
-
----
-
-## 4. Reusing an existing Hermes runtime
-
-The install script checks:
-
-```bash
-command -v hermes
-```
-
-If Hermes is already installed and on `PATH`, the skill records that runtime and does not install another copy.
-
-This is the preferred setup on macOS.
-
----
-
-## 5. Register `@Hermes` in Codex
-
-After installation, your Codex runtime must map:
+The user still needs a **Codex-facing activation instruction**.
+The minimum contract is:
 
 ```text
 @Hermes -> prompts/@Hermes.md
 ```
 
-The exact way depends on the Codex runtime you use. Typical options include:
-- prompt alias registration
+That means one of these must exist in the user's Codex environment:
+- prompt alias
 - custom skill registration
-- command alias registration
-- named reusable prompt loading
+- named reusable prompt mapping
+- a manual paste workflow into a Codex conversation
 
-The minimum requirement is that invoking `@Hermes` loads the workflow defined in:
-
-```text
-prompts/@Hermes.md
-```
+Because Codex environments differ, this repository should provide **both**:
+1. filesystem install instructions
+2. a ready-to-paste bootstrap message for Codex
 
 ---
 
-## 6. Initialize a project workspace
+## 6. Ready-to-paste bootstrap text for Codex
 
-Before daily use, initialize workspace files inside the target project.
+If the user's Codex environment does not yet support automatic alias registration, they should still be able to paste the following block directly into a new Codex conversation.
 
-Example:
+### Paste this into Codex
+
+```text
+You are now running Hermes Orchestrator mode.
+
+Load the workflow from the locally installed Hermes skill with these rules:
+1. Hermes plans, Codex executes.
+2. Every round plan must be written to disk.
+3. Use workspace files as the durable project memory.
+4. For risky, cross-module, or architectural tasks, run adversarial role review first.
+5. Use these role perspectives: PM/Business, Architect/Technical Lead, Execution Engineer, QA/Operations, Skeptic/Risk Officer.
+6. Do not rely on long chat context as the source of truth.
+7. Read and update these files when available:
+   - .hermes/workspace/PROJECT_STATE.md
+   - .hermes/workspace/CURRENT_PLAN.md
+   - .hermes/workspace/EXECUTION_LOG.md
+   - .hermes/workspace/DECISIONS.md
+8. External channels such as WeChat must update workspace state, not native chat history.
+9. If the user writes @Hermes, treat that as a request to re-enter this governed workflow.
+10. Before implementation, restate goal, constraints, current phase, and execution boundary.
+```
+
+This is not as good as native skill registration, but it gives the user a **one-paste fallback path**.
+
+---
+
+## 7. Recommended alias-style user command
+
+After the skill is installed, the ideal user experience should be one of these:
+
+```text
+@Hermes 项目 TorchVision，只分析，不改代码
+```
+
+```text
+@Hermes 读取当前状态并继续上一轮计划
+```
+
+```text
+@Hermes 先做对抗评审，再决定是否进入实施
+```
+
+So the documentation should always be written from the user's point of view:
+- how to install
+- how to activate
+- what to paste
+- what to type next
+
+---
+
+## 8. Initialize a project workspace
+
+Before the workflow is useful, the project must have durable workspace files.
+
+### Initialize with the bundled script
 
 ```bash
 bash "$HOME/.codex/skills/Hermes/scripts/bootstrap_workspace.sh" /path/to/project
@@ -107,7 +197,7 @@ This creates:
 <project>/.hermes/workspace/
 ```
 
-with these files:
+with:
 - `PROJECT_STATE.md`
 - `CURRENT_PLAN.md`
 - `EXECUTION_LOG.md`
@@ -115,72 +205,76 @@ with these files:
 
 ---
 
-## 7. First-run examples
+## 9. Recommended user flow on macOS
 
-Once the skill is installed and `@Hermes` is registered, you can start from any Codex thread with commands like:
+A good end-user flow is:
+
+### Step 1
+Clone from GitHub and run the installer.
+
+### Step 2
+Initialize the target project workspace.
+
+### Step 3
+Open Codex.
+
+### Step 4
+If Codex already supports the alias, type:
 
 ```text
-@Hermes 项目 TorchVision，只分析，不改代码
+@Hermes 项目 <project-name>
 ```
 
-```text
-@Hermes 读取当前项目状态并总结下一步
-```
+### Step 5
+If Codex does not yet support alias registration, paste the bootstrap block from this document into the conversation, then continue with:
 
 ```text
-@Hermes 先做对抗评审，再决定是否进入实施
+项目 <project-name>，进入 Hermes Orchestrator 模式
 ```
 
 ---
 
-## 8. Recommended macOS workflow
+## 10. Reusing an existing Hermes runtime
 
-A practical daily workflow on macOS is:
-1. install the skill once
-2. initialize each project workspace once
-3. use `@Hermes` whenever you want to enter governed mode
-4. let Hermes update workspace files every round
-5. resume from new Codex threads by reading workspace state rather than relying on long chat context
-
-This matches the core rule of this skill:
-
-> Hermes plans, Codex executes, and the plan must live on disk.
-
----
-
-## 9. Troubleshooting
-
-### `bash: command not found`
-Unusual on macOS, but if it happens, use `/bin/bash` explicitly:
+Check whether Hermes is already available:
 
 ```bash
-/bin/bash scripts/install.sh
+command -v hermes
 ```
 
-### `hermes` not detected
+If Hermes is found, reuse it.
+This repository should be treated as the skill package only.
+
+---
+
+## 11. Troubleshooting
+
+### Codex does not know `@Hermes`
+That means the skill files may be installed locally, but Codex has no alias/registration bound to them yet.
+
+Use either:
+- your Codex runtime's skill registration mechanism
+- or the ready-to-paste bootstrap block in this document
+
+### The skill is installed but behavior is inconsistent
+Make sure the project workspace has actually been initialized:
+
+```bash
+bash "$HOME/.codex/skills/Hermes/scripts/bootstrap_workspace.sh" /path/to/project
+```
+
+### Hermes runtime not found
 Check:
 
 ```bash
 command -v hermes
 ```
 
-If nothing is returned, either:
-- Hermes is not installed
-- or it is not on your current shell `PATH`
-
-### `@Hermes` does nothing in Codex
-This usually means Codex has not yet mapped `@Hermes` to `prompts/@Hermes.md`.
-
-### workspace files missing
-Run:
-
-```bash
-bash "$HOME/.codex/skills/Hermes/scripts/bootstrap_workspace.sh" /path/to/project
-```
+If empty, either install Hermes or configure your Codex-side workflow to run in a shell where Hermes is already available.
 
 ---
 
-## 10. Related docs
+## 12. Related docs
 
 - `README.md`
 - `docs/codex-integration.md`
