@@ -1,6 +1,48 @@
 # Hermes Orchestrator for Codex - Skill
 
-Hermes Orchestrator for Codex 是一个把 **Hermes 作为规划/审查/治理层**、把 **Codex 作为执行层** 的可安装 skill。
+Hermes Orchestrator for Codex 是一个专门给 **Codex** 使用的可安装 skill：
+
+- **Hermes 负责规划 / 审查 / 治理**
+- **Codex 负责执行**
+- **每轮计划必须落盘**
+- **通过 `@Hermes` 进入工作模式**
+
+## 给 Codex 用户的安装方式
+
+### 方式 1：从 GitHub 安装到本地 Codex skills 目录
+把下面命令里的 `<repo-url>` 替换成你的 GitHub 仓库地址：
+
+```bash
+mkdir -p ~/development/github/skills && cd ~/development/github/skills && git clone <repo-url> "Hermes Orchestrator for Codex - Skill" && cd "Hermes Orchestrator for Codex - Skill" && bash scripts/install.sh
+```
+
+如果本地已经有这个仓库：
+
+```bash
+cd ~/development/github/skills/"Hermes Orchestrator for Codex - Skill" && git pull && bash scripts/install.sh
+```
+
+默认会安装到：
+
+```text
+$HOME/.codex/skills/Hermes
+```
+
+### 方式 2：如果 Codex 还没注册 `@Hermes`
+把 `docs/codex-integration.md` 或 `docs/install-on-macos.md` 里的 bootstrap 文本直接粘贴到 Codex 对话里，作为一键启动的 fallback。
+
+### 方式 3：初始化项目 workspace
+安装完 skill 后，先初始化项目状态文件：
+
+```bash
+bash "$HOME/.codex/skills/Hermes/scripts/bootstrap_workspace.sh" /path/to/project
+```
+
+然后在 Codex 里使用：
+
+```text
+@Hermes 项目 TorchVision，只分析，不改代码
+```
 
 启用后，工作模式切换为：
 
