@@ -35,74 +35,38 @@ The user also needs either:
 
 ---
 
-## 2. User installation from GitHub
+## 2. 给 Codex 的最简安装指令
 
-Replace `<repo-url>` with the actual repository URL.
-
-### Fresh install
-```bash
-mkdir -p ~/development/github/skills && cd ~/development/github/skills && git clone <repo-url> "Hermes Orchestrator for Codex - Skill" && cd "Hermes Orchestrator for Codex - Skill" && bash scripts/install.sh
-```
-
-### Update existing checkout
-```bash
-cd ~/development/github/skills/"Hermes Orchestrator for Codex - Skill" && git pull && bash scripts/install.sh
-```
-
----
-
-## 3. Required mapping
-
-The intended mapping is:
+把下面两句话直接发给 Codex：
 
 ```text
-@Hermes -> prompts/@Hermes.md
+安装这个 skill：https://github.com/QiaoGen/skills/tree/main/Hermes%20Orchestrator%20for%20Codex%20-%20Skill
+安装完成后，启用 @Hermes，并告诉我下一条应该如何开始使用。
 ```
 
-If Codex supports custom skills or aliases, register `@Hermes` against that file.
-
-If Codex does not support it yet, use the bootstrap fallback below.
+这是本仓库推荐的默认安装方式。
 
 ---
 
-## 4. One-paste fallback for Codex conversations
+## 3. Codex 需要完成的事情
 
-Paste the following text into a fresh Codex conversation to emulate the skill even before native alias registration is fully wired.
-
-```text
-You are now running Hermes Orchestrator mode.
-Hermes plans, Codex executes.
-Every round plan must be persisted to disk.
-Use .hermes/workspace/PROJECT_STATE.md, CURRENT_PLAN.md, EXECUTION_LOG.md, and DECISIONS.md as the durable project memory.
-For risky or architectural tasks, run adversarial review using these roles: PM/Business, Architect/Technical Lead, Execution Engineer, QA/Operations, Skeptic/Risk Officer.
-Do not rely on long transcript context as the source of truth.
-If the user says @Hermes, treat that as a request to enter or resume this governed workflow.
-Before implementation, restate goal, constraints, phase, plan, and execution boundary.
-```
-
-This fallback should be documented because users need a path that works even before Codex-side alias plumbing is perfect.
+Codex 收到上面的两句话后，预期要完成：
+- 拉取这个 skill 子目录
+- 安装到本地 Codex skill 目录
+- 识别或注册 `@Hermes`
+- 返回一条可直接使用的启动命令
 
 ---
 
-## 5. Expected usage after activation
+## 4. 安装后的第一句
 
 ```text
 @Hermes 项目 TorchVision，只分析，不改代码
 ```
 
-```text
-@Hermes 读取当前 workspace 状态，进入下一阶段规划
-```
-
-```text
-@Hermes 先做对抗评审，再决定是否进入实施
-```
-
 ---
 
-## 6. Workspace initialization
-
-Before using the workflow, initialize workspace files:
+## 5. 如果还需要初始化 workspace
 
 ```bash
 bash "$HOME/.codex/skills/Hermes/scripts/bootstrap_workspace.sh" /path/to/project
@@ -110,25 +74,6 @@ bash "$HOME/.codex/skills/Hermes/scripts/bootstrap_workspace.sh" /path/to/projec
 
 ---
 
-## 7. Recommended local wrapper (future enhancement)
+## 6. 说明
 
-If Codex supports local wrappers, a future enhancement is a command like:
-
-```bash
-codex-hermes /path/to/project
-```
-
-This wrapper could:
-- change to the project directory
-- ensure `.hermes/workspace/` exists
-- load or initialize templates
-- preload `@Hermes`
-
----
-
-## 8. Non-goals
-
-This repository intentionally does **not** require:
-- intrusive patching of Codex internal conversation storage
-- direct embedding of WeChat transcript into Codex UI
-- installing a second Hermes runtime if one already exists locally
+如果某个 Codex 环境暂时还不能自动处理“安装这个 skill：<url>”这种指令，再退回到手动安装或 bootstrap 粘贴方案。

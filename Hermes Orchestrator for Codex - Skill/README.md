@@ -9,39 +9,31 @@ Hermes Orchestrator for Codex 是一个专门给 **Codex** 使用的可安装 sk
 
 ## 给 Codex 用户的安装方式
 
-### 方式 1：从 GitHub 安装到本地 Codex skills 目录
-把下面命令里的 `<repo-url>` 替换成你的 GitHub 仓库地址：
-
-```bash
-mkdir -p ~/development/github/skills && cd ~/development/github/skills && git clone <repo-url> "Hermes Orchestrator for Codex - Skill" && cd "Hermes Orchestrator for Codex - Skill" && bash scripts/install.sh
-```
-
-如果本地已经有这个仓库：
-
-```bash
-cd ~/development/github/skills/"Hermes Orchestrator for Codex - Skill" && git pull && bash scripts/install.sh
-```
-
-默认会安装到：
+### 最简安装：直接对 Codex 说两句话
+把下面两句话直接发给 Codex：
 
 ```text
-$HOME/.codex/skills/Hermes
+安装这个 skill：https://github.com/QiaoGen/skills/tree/main/Hermes%20Orchestrator%20for%20Codex%20-%20Skill
+安装完成后，启用 @Hermes，并告诉我下一条应该如何开始使用。
 ```
 
-### 方式 2：如果 Codex 还没注册 `@Hermes`
-把 `docs/codex-integration.md` 或 `docs/install-on-macos.md` 里的 bootstrap 文本直接粘贴到 Codex 对话里，作为一键启动的 fallback。
+这就是推荐安装方式。目标是让 Codex 自己完成：
+- 拉取 skill
+- 安装到本地 skill 目录
+- 识别 `@Hermes`
+- 返回下一步使用方式
 
-### 方式 3：初始化项目 workspace
-安装完 skill 后，先初始化项目状态文件：
-
-```bash
-bash "$HOME/.codex/skills/Hermes/scripts/bootstrap_workspace.sh" /path/to/project
-```
-
-然后在 Codex 里使用：
+### 安装后的第一句
 
 ```text
 @Hermes 项目 TorchVision，只分析，不改代码
+```
+
+### 如果还需要初始化项目 workspace
+由 Codex 或用户执行：
+
+```bash
+bash "$HOME/.codex/skills/Hermes/scripts/bootstrap_workspace.sh" /path/to/project
 ```
 
 启用后，工作模式切换为：
